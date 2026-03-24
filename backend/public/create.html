@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Create CV</title>
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="create.html">Create CV</a>
+      <button id="logoutBtn">Logout</button>
+    </nav>
+
+    <div class="small" id="userBox"></div>
+
+    <h1>Create CV</h1>
+
+    <div class="message" id="msg"></div>
+
+    <label>Name *</label>
+    <input type="text" id="name" placeholder="Full name">
+
+    <label>Email (from login)</label>
+    <input type="email" id="email" placeholder="Email" disabled>
+
+    <label>Key Programming *</label>
+    <input type="text" id="keyprogramming" placeholder="e.g. Java, Python">
+
+    <label>Education</label>
+    <textarea id="education" rows="3"></textarea>
+
+    <label>Profile</label>
+    <textarea id="profile" rows="3"></textarea>
+
+    <label>URL Links</label>
+    <input type="text" id="URLlinks" placeholder="LinkedIn / GitHub etc">
+
+    <button id="createBtn">Create</button>
+  </div>
+
+  <script src="./js/auth.js"></script>
+  <script src="./js/create.js"></script>
+</body>
+</html>
