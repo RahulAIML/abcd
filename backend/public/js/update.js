@@ -8,11 +8,6 @@
     msg.textContent = text;
   }
 
-  function getId() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('id');
-  }
-
   function getUser() {
     const raw = localStorage.getItem('user');
     if (!raw) return null;
@@ -27,39 +22,20 @@
     return localStorage.getItem('token');
   }
 
-  const id = getId();
-  const user = getUser();
-  const token = getToken();
+  const userData = getUser();
+  const authToken = getToken();
 
-  if (!id) {
-    showMessage('No ID found');
-  } else {
-    fetch(`${API_BASE}/api/cvs/` + id)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message) {
-          showMessage(data.message);
-          return;
-        }
-        document.getElementById('name').value = data.name || '';
-        document.getElementById('keyprogramming').value = data.keyprogramming || '';
-        document.getElementById('education').value = data.education || '';
-        document.getElementById('profile').value = data.profile || '';
-        document.getElementById('URLlinks').value = data.URLlinks || '';
-      })
-      .catch((err) => {
-        console.log(err);
-        showMessage('Error loading');
-      });
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+
+  if (!userData || !authToken) {
+    showMessage('Please login first');
+    return;
   }
 
   if (updateBtn) {
     updateBtn.addEventListener('click', () => {
-      console.log('CLICK WORKING');
-      if (!user || !token) {
-        showMessage('Please login first');
-        return;
-      }
+      console.log('UPDATE CLICK WORKING');
 
       const name = document.getElementById('name').value.trim();
       const keyprogramming = document.getElementById('keyprogramming').value.trim();
@@ -72,13 +48,11 @@
         return;
       }
 
-      showMessage('Updating...');
-
-      fetch(`${API_BASE}/api/cvs/` + id, {
+      fetch(`${API_BASE}/api/cvs/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: 'Bearer ' + token
+          Authorization: 'Bearer ' + authToken
         },
         body: JSON.stringify({
           name,
@@ -94,7 +68,8 @@
         })
         .then((data) => {
           console.log('UPDATE RESPONSE:', data);
-          if (data.success || data.id) {
+
+          if (data.success) {
             showMessage('Updated successfully!');
             setTimeout(() => {
               window.location.href = 'index.html';
