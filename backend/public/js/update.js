@@ -53,6 +53,7 @@ if (!id) {
 
 if (updateBtn) {
   updateBtn.addEventListener('click', () => {
+    console.log('CLICK WORKING');
     if (!user || !token) {
       showMessage('Please login first');
       return;
@@ -87,8 +88,9 @@ if (updateBtn) {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.id) {
-          showMessage('CV updated. Redirecting to home...');
+        console.log('UPDATE RESPONSE:', data);
+        if (data.success || data.id) {
+          showMessage('Updated successfully! Redirecting...');
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 800);

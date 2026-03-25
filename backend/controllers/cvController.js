@@ -76,7 +76,6 @@ const createCV = async (req, res, next) => {
     );
 
     if (existing.length === 0) {
-      // No user row exists (not registered)
       return res.status(404).json({ message: 'User not found. Please register first.' });
     }
 
@@ -90,13 +89,16 @@ const createCV = async (req, res, next) => {
       return res.status(409).json({ message: 'CV already exists. Use update.' });
     }
 
-    // "Create" CV by filling the existing user row
     await db.execute(
       'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE email = ?',
       [name, keyprogramming, profile, education, URLlinks, email]
     );
 
-    return res.json({ message: 'CV created', email });
+    return res.status(201).json({
+      success: true,
+      message: 'CV created successfully',
+      email
+    });
   } catch (err) {
     return next(err);
   }
@@ -129,7 +131,11 @@ const updateCV = async (req, res, next) => {
       [name, keyprogramming, profile, education, URLlinks, id]
     );
 
-    return res.json({ message: 'Updated', id });
+    return res.json({
+      success: true,
+      message: 'CV updated successfully',
+      id
+    });
   } catch (err) {
     return next(err);
   }

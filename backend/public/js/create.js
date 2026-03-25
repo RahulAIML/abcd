@@ -31,6 +31,7 @@ if (!user) {
 
 if (createBtn) {
   createBtn.addEventListener('click', () => {
+    console.log('CLICK WORKING');
     if (!user || !token) {
       showMessage('Please login first to create a CV');
       return;
@@ -59,8 +60,9 @@ if (createBtn) {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.message === 'CV saved' || data.email) {
-          showMessage('CV saved. Redirecting to home...');
+        console.log('CREATE RESPONSE:', data);
+        if (data.success || data.id || data.email) {
+          showMessage('CV created successfully! Redirecting...');
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 800);
