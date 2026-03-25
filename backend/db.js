@@ -1,19 +1,18 @@
 const mysql = require('mysql2');
 
 // connection using DATABASE_URL or individual env vars
-let config;
-if (process.env.DATABASE_URL) {
-  config = process.env.DATABASE_URL;
+let baseConfig;
+const usingDatabaseUrl = !!process.env.DATABASE_URL;
 
-  // Railway MySQL usually requires SSL through the proxy host
+if (usingDatabaseUrl) {
+  baseConfig = { uri: process.env.DATABASE_URL };
+
+  // Railway MySQL proxy usually requires SSL
   if (process.env.DATABASE_URL.includes('proxy.rlwy.net')) {
-    config = {
-      uri: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: true }
-    };
+    baseConfig.ssl = { rejectUnauthorized: false };
   }
 } else {
-  config = {
+  baseConfig = {
     host: process.env.DB_HOST || '127.0.0.1',
     user: process.env.DB_USER || 'your_db_user',
     password: process.env.DB_PASS || 'your_db_password',
@@ -23,23 +22,28 @@ if (process.env.DATABASE_URL) {
 }
 
 console.log('DB config info:', {
-  usingDatabaseUrl: !!process.env.DATABASE_URL,
-  host: process.env.DATABASE_URL ? 'DATABASE_URL' : config.host,
-  port: process.env.DATABASE_URL ? 'default' : config.port,
-  user: process.env.DATABASE_URL ? 'DATABASE_URL' : (config.user && '***')
+  usingDatabaseUrl,
+  host: usingDatabaseUrl ? 'DATABASE_URL' : baseConfig.host,
+  port: usingDatabaseUrl ? 'default' : baseConfig.port,
+  user: usingDatabaseUrl ? 'DATABASE_URL' : (baseConfig.user && '***')
 });
 
-const db = mysql.createConnection(config);
+const pool = mysql.createPool({
+  ...baseConfig,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-db.connect((err) => {
+pool.getConnection((err, conn) => {
   if (err) {
     console.error('DB error connecting');
     console.error(err);
-    console.error('Resolved connection config:', config);
   } else {
     console.log('DB connected');
+    conn.release();
   }
 });
 
-module.exports = db;
+module.exports = pool;
 

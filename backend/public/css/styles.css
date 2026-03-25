@@ -2,62 +2,63 @@ body {
   font-family: "Segoe UI", Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background: #f5f6f8;
+  background: linear-gradient(180deg, #f6f7fb 0%, #eef2f6 100%);
   color: #222;
   line-height: 1.6;
 }
 
 .container {
-  max-width: 900px;
+  max-width: 920px;
   margin: 28px auto;
-  padding: 24px;
+  padding: 24px 26px;
   background: #fff;
-  border: 1px solid #e3e3e3;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e3e6ea;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(20, 30, 40, 0.08);
 }
 
 nav {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   padding: 10px 12px;
-  background: #eef1f5;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  margin-bottom: 16px;
+  background: #f1f4f8;
+  border: 1px solid #e2e6ec;
+  border-radius: 10px;
+  margin-bottom: 18px;
 }
 
 nav a {
   text-decoration: none;
-  color: #333;
-  padding: 6px 10px;
+  color: #2b3a55;
+  padding: 7px 10px;
   border-radius: 6px;
 }
 
 nav a:hover {
-  background: #e2e6ea;
+  background: #e3e9f0;
 }
 
 nav button {
   width: auto;
-  padding: 6px 10px;
+  padding: 7px 10px;
   margin: 0;
-  background: #e2e6ea;
-  color: #333;
-  border: 1px solid #d0d4d8;
+  background: #e3e9f0;
+  color: #2b3a55;
+  border: 1px solid #d5dce4;
   border-radius: 6px;
   cursor: pointer;
 }
 
 nav button:hover {
-  background: #d7dbe0;
+  background: #d6dde6;
 }
 
 h1 {
   margin: 0 0 12px 0;
-  font-size: 24px;
+  font-size: 26px;
+  color: #1e2a3f;
 }
 
 h3 {
@@ -65,7 +66,7 @@ h3 {
 }
 
 .small {
-  color: #666;
+  color: #566070;
   font-size: 14px;
   margin-bottom: 8px;
 }
@@ -74,8 +75,8 @@ input, textarea, select, button {
   width: 100%;
   padding: 10px;
   margin: 6px 0 14px 0;
-  border: 1px solid #cfcfcf;
-  border-radius: 6px;
+  border: 1px solid #cfd6df;
+  border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
 }
@@ -83,28 +84,28 @@ input, textarea, select, button {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: #3a6fd9;
-  box-shadow: 0 0 0 2px rgba(58, 111, 217, 0.12);
+  box-shadow: 0 0 0 3px rgba(58, 111, 217, 0.12);
 }
 
 button {
-  background: #3a6fd9;
+  background: #2f6fe4;
   color: #fff;
   border: none;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 10px;
 }
 
 button:hover {
-  background: #2f5cc0;
+  background: #285fca;
 }
 
 .card {
-  border: 1px solid #ddd;
-  padding: 14px;
+  border: 1px solid #e0e4ea;
+  padding: 14px 16px;
   margin-bottom: 12px;
-  border-radius: 8px;
-  background: #fafafa;
+  border-radius: 10px;
+  background: #fafbfc;
 }
 
 .card strong {
@@ -114,8 +115,26 @@ button:hover {
 
 .message {
   padding: 8px 10px;
-  background: #eef1f4;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  background: #eef3f8;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
   margin-bottom: 12px;
+}
+
+@media (max-width: 700px) {
+  .container {
+    margin: 16px;
+    padding: 18px;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  nav a,
+  nav button {
+    width: 100%;
+    text-align: center;
+  }
 }
