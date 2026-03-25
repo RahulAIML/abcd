@@ -15,7 +15,7 @@ const getCVById = (req, res) => {
   const id = req.params.id;
   console.log('=== GET CV BY ID ===');
   console.log('Fetching ID:', id);
-  
+
   const sql = 'SELECT id, name, email, keyprogramming, profile, education, URLlinks FROM cvs WHERE id = ?';
   db.query(sql, [id], (err, result) => {
     if (err) {
@@ -23,7 +23,7 @@ const getCVById = (req, res) => {
       return res.send('error');
     }
     console.log('Query result:', result);
-    
+
     if (result.length === 0) {
       console.log('No record found for id:', id);
       return res.json({ message: 'Not found' });
@@ -72,7 +72,7 @@ const createCV = (req, res) => {
   console.log('req.body.profile:', req.body.profile, 'type:', typeof req.body.profile);
   console.log('req.body.education:', req.body.education, 'type:', typeof req.body.education);
   console.log('req.body.URLlinks:', req.body.URLlinks, 'type:', typeof req.body.URLlinks);
-  
+
   const name = (req.body.name || '').trim();
   const email = (req.body.email || '').trim();
   const keyprogramming = (req.body.keyprogramming || '').trim();
@@ -89,52 +89,38 @@ const createCV = (req, res) => {
     URLlinks: `"${URLlinks}"`
   });
 
-  // Validation like registration
-  if (!name || !email || !keyprogramming) {
-    console.log('❌ Validation FAILED - missing required fields');
-    console.log('   name empty?', !name, ' email empty?', !email, ' keyprogramming empty?', !keyprogramming);
+  if (!name || !email || !keyprogramming || !education || !profile || !URLlinks) {
+    console.log('VALIDATION FAILED - missing required fields');
+    console.log('name empty?', !name, 'email empty?', !email, 'keyprogramming empty?', !keyprogramming);
+    console.log('education empty?', !education, 'profile empty?', !profile, 'URLlinks empty?', !URLlinks);
     return res.json({ message: 'Please fill required fields' });
   }
 
-  console.log('✓ Validation passed');
+  console.log('Validation passed');
 
-  // Find user by email (must exist from registration)
-  db.query('SELECT id FROM cvs WHERE email = ?', [email], (err, result) => {
+  // Update by email (email is unique)
+  const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE email = ?';
+  const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, email];
+
+  console.log('Executing UPDATE query:', sql);
+  console.log('With parameters:', values);
+
+  db.query(sql, values, (err, result) => {
     if (err) {
-      console.error('❌ SELECT error:', err);
+      console.error('UPDATE error:', err);
       return res.send('error');
     }
+    console.log('UPDATE successful');
+    console.log('Result:', result);
+    console.log('Affected rows:', result.affectedRows);
+    console.log('Changed rows:', result.changedRows);
 
-    console.log('Database query result:', result);
-    console.log('Records found:', result.length);
-
-    if (result.length === 0) {
-      console.log('❌ User not found for email:', email);
+    if (result.affectedRows === 0) {
+      console.log('User not found for email:', email);
       return res.json({ message: 'User not found. Please register first.' });
     }
 
-    const userId = result[0].id;
-    console.log('✓ User found with ID:', userId);
-    
-    // UPDATE user's CV fields
-    const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE id = ?';
-    const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, userId];
-    
-    console.log('Executing UPDATE query:', sql);
-    console.log('With parameters:', values);
-    
-    db.query(sql, values, (err2, result2) => {
-      if (err2) {
-        console.error('❌ UPDATE error:', err2);
-        return res.send('error');
-      }
-      console.log('✓ UPDATE successful');
-      console.log('Result:', result2);
-      console.log('Affected rows:', result2.affectedRows);
-      console.log('Changed rows:', result2.changedRows);
-      
-      res.json({ message: 'CV created', id: userId });
-    });
+    res.json({ message: 'CV saved', email });
   });
 };
 
@@ -146,7 +132,7 @@ const updateCV = (req, res) => {
   console.log('req.body.name:', req.body.name, 'type:', typeof req.body.name);
   console.log('req.body.keyprogramming:', req.body.keyprogramming, 'type:', typeof req.body.keyprogramming);
   console.log('req.body.email:', req.body.email, 'type:', typeof req.body.email);
-  
+
   const name = (req.body.name || '').trim();
   const keyprogramming = (req.body.keyprogramming || '').trim();
   const education = (req.body.education || '').trim();
@@ -163,67 +149,41 @@ const updateCV = (req, res) => {
     URLlinks: `"${URLlinks}"`
   });
 
-  // Validation like registration
-  if (!name || !keyprogramming) {
-    console.log('❌ Validation FAILED - name or keyprogramming empty');
-    console.log('   name empty?', !name, ' keyprogramming empty?', !keyprogramming);
-    return res.json({ message: 'Name and keyprogramming are required' });
+  if (!name || !keyprogramming || !education || !profile || !URLlinks) {
+    console.log('VALIDATION FAILED - missing required fields');
+    console.log('name empty?', !name, 'keyprogramming empty?', !keyprogramming);
+    console.log('education empty?', !education, 'profile empty?', !profile, 'URLlinks empty?', !URLlinks);
+    return res.json({ message: 'Please fill required fields' });
   }
 
   if (!email) {
-    console.log('❌ Validation FAILED - email required for verification');
+    console.log('VALIDATION FAILED - email required for verification');
     return res.json({ message: 'Email required for verification' });
   }
 
-  console.log('✓ Validation passed');
+  console.log('Validation passed');
 
-  // Check ownership by email like registration checked email
-  db.query('SELECT id, email FROM cvs WHERE id = ?', [id], (err, result) => {
+  const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE id = ? AND email = ?';
+  const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, id, email];
+
+  console.log('Executing UPDATE query:', sql);
+  console.log('With parameters:', values);
+
+  db.query(sql, values, (err, result) => {
     if (err) {
-      console.error('❌ SELECT error:', err);
+      console.error('UPDATE error:', err);
       return res.send('error');
     }
+    console.log('UPDATE completed');
+    console.log('Result:', result);
+    console.log('Affected rows:', result.affectedRows);
+    console.log('Changed rows:', result.changedRows);
 
-    console.log('Database query result:', result);
-    console.log('Records found:', result.length);
-
-    if (result.length === 0) {
-      console.log('❌ CV not found for id:', id);
-      return res.json({ message: 'CV not found' });
+    if (result.affectedRows === 0) {
+      return res.json({ message: 'Not allowed or CV not found' });
     }
 
-    // Verify owner
-    const dbEmail = result[0].email;
-    console.log('Record email from DB:', dbEmail);
-    console.log('Email provided:', email);
-    console.log('Match?', dbEmail === email);
-    
-    if (dbEmail !== email) {
-      console.log('❌ Email mismatch - ownership check failed');
-      return res.json({ message: 'Not allowed - ownership verification failed' });
-    }
-
-    console.log('✓ Ownership verified');
-
-    // UPDATE like registration just sets values
-    const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE id = ?';
-    const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, id];
-    
-    console.log('Executing UPDATE query:', sql);
-    console.log('With parameters:', values);
-    
-    db.query(sql, values, (err2, result2) => {
-      if (err2) {
-        console.error('❌ UPDATE error:', err2);
-        return res.send('error');
-      }
-      console.log('✓ UPDATE successful');
-      console.log('Result:', result2);
-      console.log('Affected rows:', result2.affectedRows);
-      console.log('Changed rows:', result2.changedRows);
-      
-      res.json({ message: 'Updated', id });
-    });
+    res.json({ message: 'Updated', id });
   });
 };
 

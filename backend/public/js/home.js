@@ -31,7 +31,7 @@ function renderCVs(data) {
     div.className = 'card';
 
     let updateLink = '';
-    if (user) {
+    if (user && (cv.email === user.email || cv.id === user.id)) {
       updateLink = ` | <a href="update.html?id=${cv.id}">Update</a>`;
     }
 

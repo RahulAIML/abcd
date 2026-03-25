@@ -37,7 +37,7 @@ if (createBtn) {
     const profile = document.getElementById('profile').value.trim();
     const URLlinks = document.getElementById('URLlinks').value.trim();
 
-    if (!name || !email || !keyprogramming) {
+    if (!name || !email || !keyprogramming || !education || !profile || !URLlinks) {
       showMessage('Please fill required fields');
       return;
     }
@@ -51,8 +51,8 @@ if (createBtn) {
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.id) {
-          showMessage('CV created. Redirecting to home...');
+        if (data.message === 'CV saved' || data.email) {
+          showMessage('CV saved. Redirecting to home...');
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 800);

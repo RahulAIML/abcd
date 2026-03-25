@@ -58,8 +58,8 @@ if (updateBtn) {
     const profile = document.getElementById('profile').value.trim();
     const URLlinks = document.getElementById('URLlinks').value.trim();
 
-    if (!name || !keyprogramming) {
-      showMessage('Name and keyprogramming are required');
+    if (!name || !keyprogramming || !education || !profile || !URLlinks) {
+      showMessage('Please fill required fields');
       return;
     }
 

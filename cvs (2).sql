@@ -34,10 +34,10 @@ CREATE TABLE `cvs` (
   `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `keyprogramming` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `profile` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `education` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `URLlinks` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL
+  `keyprogramming` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `profile` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `education` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '',
+  `URLlinks` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE utf8mb4_general_ci; 
 
 
