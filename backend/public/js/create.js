@@ -16,7 +16,12 @@ function getUser() {
   }
 }
 
+function getToken() {
+  return localStorage.getItem('token');
+}
+
 const user = getUser();
+const token = getToken();
 if (!user) {
   showMessage('Please login first to create a CV');
 } else {
@@ -25,19 +30,18 @@ if (!user) {
 
 if (createBtn) {
   createBtn.addEventListener('click', () => {
-    if (!user) {
+    if (!user || !token) {
       showMessage('Please login first to create a CV');
       return;
     }
 
     const name = document.getElementById('name').value.trim();
-    const email = user.email;
     const keyprogramming = document.getElementById('keyprogramming').value.trim();
     const education = document.getElementById('education').value.trim();
     const profile = document.getElementById('profile').value.trim();
     const URLlinks = document.getElementById('URLlinks').value.trim();
 
-    if (!name || !email || !keyprogramming || !education || !profile || !URLlinks) {
+    if (!name || !keyprogramming || !education || !profile || !URLlinks) {
       showMessage('Please fill required fields');
       return;
     }
@@ -46,8 +50,11 @@ if (createBtn) {
 
     fetch('/api/cvs', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, keyprogramming, education, profile, URLlinks })
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({ name, keyprogramming, education, profile, URLlinks })
     })
       .then((res) => res.json())
       .then((data) => {

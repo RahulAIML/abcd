@@ -1,88 +1,64 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 const fs = require('fs');
+const path = require('path');
+const dotenv = require('dotenv');
 
-// Load a secret file if present (Render mounts files in /etc/secrets)
-function loadSecretFile() {
-  const candidates = [
-    process.env.SECRET_FILE,
-    process.env.RENDER_SECRET_FILE,
-    '/etc/secrets/.env',
-    '/etc/secrets/db.env',
-    '/etc/secrets/database.env',
-    '/etc/secrets/secret.env',
-    '/etc/secrets/AstonCv.env'
-  ].filter(Boolean);
+// Load local .env if present (for dev)
+dotenv.config({ path: path.join(__dirname, '..', '..', 'AstonCV.env') });
+dotenv.config(); // also load default .env if present
 
-  for (const filePath of candidates) {
-    if (!fs.existsSync(filePath)) continue;
-    const content = fs.readFileSync(filePath, 'utf8');
-    content.split('\n').forEach((line) => {
-      const clean = line.trim();
-      if (!clean || clean.startsWith('#')) return;
-      const idx = clean.indexOf('=');
-      if (idx === -1) return;
-      const key = clean.slice(0, idx).trim();
-      let value = clean.slice(idx + 1).trim();
-      value = value.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
-      if (!process.env[key]) {
-        process.env[key] = value;
-      }
-    });
-    break;
-  }
+const requiredVars = ['DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+
+// Optional: Render secret file support
+const renderSecretPath = '/etc/secrets/AstonCv.env';
+if (requiredVars.some((k) => !process.env[k]) && fs.existsSync(renderSecretPath)) {
+  const content = fs.readFileSync(renderSecretPath, 'utf8');
+  content.split('\n').forEach((line) => {
+    const clean = line.trim();
+    if (!clean || clean.startsWith('#')) return;
+    const idx = clean.indexOf('=');
+    if (idx === -1) return;
+    const key = clean.slice(0, idx).trim();
+    let value = clean.slice(idx + 1).trim();
+    value = value.replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+    if (requiredVars.includes(key) && !process.env[key]) {
+      process.env[key] = value;
+    }
+  });
 }
 
-loadSecretFile();
-
-// connection using DATABASE_URL or individual env vars
-let baseConfig;
-const databaseUrl = process.env.DATABASE_URL || process.env.MYSQL_PUBLIC_URL || process.env.MYSQL_URL;
-const usingDatabaseUrl = !!databaseUrl;
-
-if (usingDatabaseUrl) {
-  baseConfig = { uri: databaseUrl };
-
-  // Railway MySQL proxy usually requires SSL
-  if (databaseUrl.includes('proxy.rlwy.net')) {
-    baseConfig.ssl = { rejectUnauthorized: false };
-  }
-} else {
-  baseConfig = {
-    host: process.env.DB_HOST || process.env.MYSQLHOST || process.env.MYSQL_HOST || '127.0.0.1',
-    user: process.env.DB_USER || process.env.MYSQLUSER || process.env.MYSQL_USER || process.env.MYSQL_USERNAME || 'your_db_user',
-    password: process.env.DB_PASS || process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || process.env.MYSQL_PASSWORD || process.env.MYSQL_ROOT_PASSWORD || 'your_db_password',
-    database: process.env.DB_NAME || process.env.MYSQLDATABASE || process.env.MYSQL_DATABASE || 'your_db_name',
-    port: process.env.DB_PORT || process.env.MYSQLPORT || process.env.MYSQL_PORT || 3306
-  };
-
-  if (String(baseConfig.host).includes('proxy.rlwy.net')) {
-    baseConfig.ssl = { rejectUnauthorized: false };
-  }
+const missing = requiredVars.filter((k) => !process.env[k]);
+if (missing.length > 0) {
+  console.error('Missing DB environment variables:', missing.join(', '));
 }
-
-console.log('DB config info:', {
-  usingDatabaseUrl,
-  host: usingDatabaseUrl ? 'DATABASE_URL' : baseConfig.host,
-  port: usingDatabaseUrl ? 'default' : baseConfig.port,
-  user: usingDatabaseUrl ? 'DATABASE_URL' : (baseConfig.user && '***')
-});
 
 const pool = mysql.createPool({
-  ...baseConfig,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT || 3306),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  ssl: process.env.DB_HOST && process.env.DB_HOST.includes('proxy.rlwy.net')
+    ? { rejectUnauthorized: false }
+    : undefined,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-pool.getConnection((err, conn) => {
-  if (err) {
-    console.error('DB error connecting');
-    console.error(err);
-  } else {
-    console.log('DB connected');
+async function testConnection() {
+  try {
+    const conn = await pool.getConnection();
+    await conn.ping();
     conn.release();
+    console.log('DB connected');
+  } catch (err) {
+    console.error('DB connection error');
+    console.error(err);
   }
-});
+}
+
+testConnection();
 
 module.exports = pool;
 

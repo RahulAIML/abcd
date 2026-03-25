@@ -8,12 +8,17 @@ function getUser() {
   }
 }
 
+function getToken() {
+  return localStorage.getItem('token');
+}
+
 const logoutBtn = document.getElementById('logoutBtn');
 const userBox = document.getElementById('userBox');
 const user = getUser();
+const token = getToken();
 
 if (userBox) {
-  if (user) {
+  if (user && token) {
     userBox.textContent = 'Logged in as: ' + user.email;
   } else {
     userBox.textContent = 'Not logged in';
@@ -21,11 +26,12 @@ if (userBox) {
 }
 
 if (logoutBtn) {
-  if (!user) {
+  if (!user || !token) {
     logoutBtn.style.display = 'none';
   }
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     alert('Logout completed');
     window.location.href = 'login.html';
   });

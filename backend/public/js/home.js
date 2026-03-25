@@ -17,6 +17,19 @@ function getUser() {
   }
 }
 
+function getToken() {
+  return localStorage.getItem('token');
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function renderCVs(data) {
   list.innerHTML = '';
   if (!data || data.length === 0) {
@@ -25,20 +38,21 @@ function renderCVs(data) {
   }
 
   const user = getUser();
+  const token = getToken();
 
   data.forEach((cv) => {
     const div = document.createElement('div');
     div.className = 'card';
 
     let updateLink = '';
-    if (user && (cv.email === user.email || cv.id === user.id)) {
+    if (user && token && (cv.email === user.email || cv.id === user.id)) {
       updateLink = ` | <a href="update.html?id=${cv.id}">Update</a>`;
     }
 
     div.innerHTML = `
-      <strong>${cv.name || 'No name'}</strong><br>
-      <span class="small">${cv.email || ''}</span><br>
-      <span class="small">${cv.keyprogramming || ''}</span><br>
+      <strong>${escapeHtml(cv.name || 'No name')}</strong><br>
+      <span class="small">${escapeHtml(cv.email || '')}</span><br>
+      <span class="small">${escapeHtml(cv.keyprogramming || '')}</span><br>
       <a href="cv.html?id=${cv.id}">View</a>${updateLink}
     `;
     list.appendChild(div);

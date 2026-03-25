@@ -23,8 +23,9 @@ loginBtn.addEventListener('click', () => {
   })
     .then((res) => res.json())
     .then((data) => {
-      if (data.user) {
+      if (data.user && data.token) {
         localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem('token', data.token);
         showMessage('Login completed. Redirecting to home...');
         setTimeout(() => {
           window.location.href = 'index.html';

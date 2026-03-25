@@ -2,6 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CV Home</title>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
@@ -21,13 +22,17 @@
 
     <div class="message" id="msg"></div>
 
-    <h3>Search</h3>
-    <input type="text" id="searchName" placeholder="Search by name">
-    <input type="text" id="searchLang" placeholder="Search by key programming">
-    <button id="searchBtn">Search</button>
-    <button id="clearBtn">Clear</button>
+    <div class="search-card">
+      <h3>Search</h3>
+      <input type="text" id="searchName" placeholder="Search by name">
+      <input type="text" id="searchLang" placeholder="Search by key programming">
+      <div class="actions">
+        <button id="searchBtn">Search</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </div>
 
-    <div id="cvList"></div>
+    <div id="cvList" class="grid"></div>
   </div>
 
   <script src="./js/auth.js"></script>

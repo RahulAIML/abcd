@@ -20,8 +20,13 @@ function getUser() {
   }
 }
 
+function getToken() {
+  return localStorage.getItem('token');
+}
+
 const id = getId();
 const user = getUser();
+const token = getToken();
 
 if (!id) {
   showMessage('No ID found');
@@ -47,7 +52,7 @@ if (!id) {
 
 if (updateBtn) {
   updateBtn.addEventListener('click', () => {
-    if (!user) {
+    if (!user || !token) {
       showMessage('Please login first');
       return;
     }
@@ -67,14 +72,16 @@ if (updateBtn) {
 
     fetch('/api/cvs/' + id, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
       body: JSON.stringify({
         name,
         keyprogramming,
         education,
         profile,
-        URLlinks,
-        email: user.email
+        URLlinks
       })
     })
       .then((res) => res.json())
