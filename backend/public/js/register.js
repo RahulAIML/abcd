@@ -1,5 +1,6 @@
 const msg = document.getElementById('msg');
 const registerBtn = document.getElementById('registerBtn');
+const API_BASE = window.API_BASE || window.location.origin;
 
 function showMessage(text) {
   msg.textContent = text;

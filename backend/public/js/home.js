@@ -2,6 +2,7 @@ const list = document.getElementById('cvList');
 const msg = document.getElementById('msg');
 const searchBtn = document.getElementById('searchBtn');
 const clearBtn = document.getElementById('clearBtn');
+const API_BASE = window.API_BASE || window.location.origin;
 
 function showMessage(text) {
   msg.textContent = text;

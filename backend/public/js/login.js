@@ -1,5 +1,6 @@
 const msg = document.getElementById('msg');
 const loginBtn = document.getElementById('loginBtn');
+const API_BASE = window.API_BASE || window.location.origin;
 
 function showMessage(text) {
   msg.textContent = text;
