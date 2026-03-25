@@ -76,78 +76,43 @@ const createCV = (req, res) => {
 
   console.log('Parsed fields:', {name, email, keyprogramming, education, profile, URLlinks});
 
+  // Validation like registration does
   if (!name || !email || !keyprogramming) {
     console.log('Validation failed: missing required fields');
     return res.json({ message: 'Please fill required fields' });
   }
 
-  // if row exists, update it instead of insert
-  db.query('SELECT id, email FROM cvs WHERE email = ?', [email], (err, result) => {
+  // Find user by email (must exist from registration)
+  db.query('SELECT id FROM cvs WHERE email = ?', [email], (err, result) => {
     if (err) {
       console.error('SELECT error:', err);
       return res.send('error');
     }
 
-    console.log('Found existing record:', result.length > 0 ? result[0] : 'none');
+    console.log('Query result:', result.length > 0 ? 'User found' : 'User not found');
 
-    if (result.length > 0) {
-      const row = result[0];
-      
-      // Build dynamic UPDATE only with non-empty fields
-      const updates = [];
-      const updateValues = [];
-
-      if (name) { updates.push('name = ?'); updateValues.push(name); }
-      if (keyprogramming) { updates.push('keyprogramming = ?'); updateValues.push(keyprogramming); }
-      if (profile) { updates.push('profile = ?'); updateValues.push(profile); }
-      if (education) { updates.push('education = ?'); updateValues.push(education); }
-      if (URLlinks) { updates.push('URLlinks = ?'); updateValues.push(URLlinks); }
-
-      if (updates.length === 0) {
-        console.log('No CV fields provided to create/update');
-        return res.json({ message: 'Please fill at least one CV field' });
-      }
-
-      updateValues.push(row.id);
-      const sql = 'UPDATE cvs SET ' + updates.join(', ') + ' WHERE id = ?';
-      
-      console.log('Executing UPDATE (existing row) with query:', sql);
-      console.log('With values:', updateValues);
-      
-      db.query(sql, updateValues, (err2, result2) => {
-        if (err2) {
-          console.error('CV update (create) failed:', err2);
-          return res.send('error');
-        }
-        console.log('UPDATE affectedRows:', result2.affectedRows, 'changedRows:', result2.changedRows);
-        console.log('CV updated (create):', row.id, {name, keyprogramming, profile, education, URLlinks});
-        return res.json({ message: 'CV updated', id: row.id });
-      });
-      return;
+    if (result.length === 0) {
+      console.log('User does not exist - must register first');
+      return res.json({ message: 'User not found. Please register first.' });
     }
 
-    const sql = 'INSERT INTO cvs (name, email, password, keyprogramming, profile, education, URLlinks) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    const insertValues = [
-      name, 
-      email, 
-      '', 
-      keyprogramming,
-      profile || null,  // Convert empty string to NULL for optional fields
-      education || null,
-      URLlinks || null
-    ];
+    const userId = result[0].id;
     
-    console.log('Executing INSERT with query:', sql);
-    console.log('With values:', insertValues);
+    // UPDATE user's CV fields (like registration just inserts)
+    const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE id = ?';
+    const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, userId];
     
-    db.query(sql, insertValues, (err3, result2) => {
-      if (err3) {
-        console.error('INSERT query error:', err3);
+    console.log('Executing UPDATE with query:', sql);
+    console.log('With values:', values);
+    
+    db.query(sql, values, (err2, result2) => {
+      if (err2) {
+        console.error('UPDATE error:', err2);
         return res.send('error');
       }
-      console.log('INSERT affectedRows:', result2.affectedRows, 'insertId:', result2.insertId);
-      console.log('CV created:', result2.insertId, {name, email, keyprogramming, profile, education, URLlinks});
-      res.json({ message: 'CV created', id: result2.insertId });
+      console.log('UPDATE affectedRows:', result2.affectedRows, 'changedRows:', result2.changedRows);
+      console.log('CV created/updated:', userId, {name, keyprogramming, profile, education, URLlinks});
+      res.json({ message: 'CV created', id: userId });
     });
   });
 };
@@ -167,57 +132,49 @@ const updateCV = (req, res) => {
 
   console.log('Parsed fields:', {name, keyprogramming, education, profile, URLlinks, email});
 
-  // Build dynamic UPDATE only with non-empty fields
-  const updates = [];
-  const values = [];
-
-  if (name) { updates.push('name = ?'); values.push(name); }
-  if (keyprogramming) { updates.push('keyprogramming = ?'); values.push(keyprogramming); }
-  if (education) { updates.push('education = ?'); values.push(education); }
-  if (profile) { updates.push('profile = ?'); values.push(profile); }
-  if (URLlinks) { updates.push('URLlinks = ?'); values.push(URLlinks); }
-
-  if (updates.length === 0) {
-    console.log('Validation failed: no fields to update');
-    return res.json({ message: 'Please fill at least one field to update' });
+  // Validation like registration
+  if (!name || !keyprogramming) {
+    console.log('Validation failed: name and keyprogramming required');
+    return res.json({ message: 'Name and keyprogramming are required' });
   }
 
   if (!email) {
-    console.log('Validation failed: no email provided');
-    return res.json({ message: 'Not allowed' });
+    console.log('Validation failed: email required for verification');
+    return res.json({ message: 'Email required for verification' });
   }
 
-  // check owner by email
-  db.query('SELECT email FROM cvs WHERE id = ?', [id], (err, result) => {
+  // Check ownership by email like registration checked email
+  db.query('SELECT id, email FROM cvs WHERE id = ?', [id], (err, result) => {
     if (err) {
-      console.error('SELECT owner check error:', err);
+      console.error('SELECT error:', err);
       return res.send('error');
     }
+
     if (result.length === 0) {
-      console.log('No record found for id:', id);
-      return res.json({ message: 'Not found' });
-    }
-    console.log('Current owner email:', result[0].email, 'Provided email:', email);
-    
-    if (result[0].email !== email) {
-      console.log('Email mismatch - ownership check failed');
-      return res.json({ message: 'Not allowed' });
+      console.log('CV not found for id:', id);
+      return res.json({ message: 'CV not found' });
     }
 
-    // Dynamic SQL: UPDATE cvs SET name = ?, keyprogramming = ? WHERE id = ?
-    const sql = 'UPDATE cvs SET ' + updates.join(', ') + ' WHERE id = ?';
-    values.push(id);
+    // Verify owner
+    if (result[0].email !== email) {
+      console.log('Email mismatch - ownership check failed. Record email:', result[0].email, 'Provided:', email);
+      return res.json({ message: 'Not allowed - ownership verification failed' });
+    }
+
+    // UPDATE like registration just sets values
+    const sql = 'UPDATE cvs SET name = ?, keyprogramming = ?, profile = ?, education = ?, URLlinks = ? WHERE id = ?';
+    const values = [name, keyprogramming, profile || null, education || null, URLlinks || null, id];
     
-    console.log('Executing UPDATE query:', sql);
+    console.log('Executing UPDATE with query:', sql);
     console.log('With values:', values);
     
     db.query(sql, values, (err2, result2) => {
       if (err2) {
-        console.error('UPDATE query error:', err2);
+        console.error('UPDATE error:', err2);
         return res.send('error');
       }
-      console.log('UPDATE result affectedRows:', result2.affectedRows);
-      console.log('CV updated:', id, {name, keyprogramming, education, profile, URLlinks});
+      console.log('UPDATE affectedRows:', result2.affectedRows, 'changedRows:', result2.changedRows);
+      console.log('CV updated:', id, {name, keyprogramming, profile, education, URLlinks});
       res.json({ message: 'Updated', id });
     });
   });
