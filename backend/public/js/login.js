@@ -16,7 +16,7 @@ loginBtn.addEventListener('click', () => {
 
   showMessage('Logging in...');
 
-  fetch('/api/login', {
+  fetch(`${API_BASE}/api/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password })

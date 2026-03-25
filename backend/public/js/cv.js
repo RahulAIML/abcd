@@ -27,7 +27,7 @@ if (!id) {
   console.log('=== FRONTEND CV LOAD ===');
   console.log('Fetching CV ID:', id);
   
-  fetch('/api/cvs/' + id)
+  fetch(`${API_BASE}/api/cvs/` + id)
     .then((res) => res.json())
     .then((data) => {
       console.log('=== FRONTEND CV RESPONSE ===');

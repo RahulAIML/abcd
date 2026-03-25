@@ -61,7 +61,7 @@ function renderCVs(data) {
 
 function loadAll() {
   showMessage('Loading...');
-  fetch('/api/cvs')
+  fetch(`${API_BASE}/api/cvs`)
     .then((res) => res.json())
     .then((data) => {
       renderCVs(data);
@@ -87,7 +87,7 @@ searchBtn.addEventListener('click', () => {
   if (name) params.append('name', name);
   if (keyprogramming) params.append('keyprogramming', keyprogramming);
 
-  fetch('/api/cvs/search?' + params.toString())
+  fetch(`${API_BASE}/api/cvs/search?` + params.toString())
     .then((res) => res.json())
     .then((data) => {
       renderCVs(data);

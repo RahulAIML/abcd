@@ -31,7 +31,7 @@ const token = getToken();
 if (!id) {
   showMessage('No ID found');
 } else {
-  fetch('/api/cvs/' + id)
+  fetch(`${API_BASE}/api/cvs/` + id)
     .then((res) => res.json())
     .then((data) => {
       if (data.message) {
@@ -70,7 +70,7 @@ if (updateBtn) {
 
     showMessage('Updating...');
 
-    fetch('/api/cvs/' + id, {
+    fetch(`${API_BASE}/api/cvs/` + id, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

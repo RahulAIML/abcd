@@ -48,7 +48,7 @@ if (createBtn) {
 
     showMessage('Creating CV...');
 
-    fetch('/api/cvs', {
+    fetch(`${API_BASE}/api/cvs`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
