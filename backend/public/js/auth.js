@@ -14,19 +14,19 @@ function getToken() {
 
 const logoutBtn = document.getElementById('logoutBtn');
 const userBox = document.getElementById('userBox');
-const user = getUser();
+const currentUser = getUser();
 const token = getToken();
 
 if (userBox) {
-  if (user && token) {
-    userBox.textContent = 'Logged in as: ' + user.email;
+  if (currentUser && token) {
+    userBox.textContent = 'Logged in as: ' + currentUser.email;
   } else {
     userBox.textContent = 'Not logged in';
   }
 }
 
 if (logoutBtn) {
-  if (!user || !token) {
+  if (!currentUser || !token) {
     logoutBtn.style.display = 'none';
   }
   logoutBtn.addEventListener('click', () => {
